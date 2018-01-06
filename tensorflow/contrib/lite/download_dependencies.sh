@@ -35,6 +35,7 @@ FARMHASH_URL="https://mirror.bazel.build/github.com/google/farmhash/archive/816a
 FLATBUFFERS_URL="https://github.com/google/flatbuffers/archive/master.zip"
 MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_ios_lite_float_2017_11_08.zip"
 QUANTIZED_MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_224_android_quant_2017_11_08.zip"
+ZLIB_URL="$(grep -o 'https://mirror.bazel.build/zlib.net/zlib.*.tar.gz' "${BZL_FILE_PATH}" | head -n1)"
 
 # TODO(petewarden): Some new code in Eigen triggers a clang bug with iOS arm64,
 #                   so work around it by patching the source.
@@ -92,6 +93,7 @@ download_and_extract "${FARMHASH_URL}" "${DOWNLOADS_DIR}/farmhash"
 download_and_extract "${FLATBUFFERS_URL}" "${DOWNLOADS_DIR}/flatbuffers"
 download_and_extract "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
 download_and_extract "${QUANTIZED_MODELS_URL}" "${DOWNLOADS_DIR}/quantized_models"
+download_and_extract "${ZLIB_URL}" "${DOWNLOADS_DIR}/zlib"
 
 replace_by_sed 's#static uint32x4_t p4ui_CONJ_XOR = vld1q_u32( conj_XOR_DATA );#static uint32x4_t p4ui_CONJ_XOR; // = vld1q_u32( conj_XOR_DATA ); - Removed by script#' \
   "${DOWNLOADS_DIR}/eigen/Eigen/src/Core/arch/NEON/Complex.h"

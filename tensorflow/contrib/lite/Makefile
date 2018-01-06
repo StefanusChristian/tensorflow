@@ -17,8 +17,18 @@ else
 		HOST_OS := OSX
 	endif
 endif
+HOST_ARCH := $(shell if [[ $(shell uname -m) =~ i[345678]86 ]]; then echo x86_32; else echo $(shell uname -m); fi)
 
-ARCH := $(shell if [[ $(shell uname -m) =~ i[345678]86 ]]; then echo x86_32; else echo $(shell uname -m); fi)
+
+# Self-hosting
+TARGET_ARCH := ${HOST_ARCH}
+
+# Cross compiling
+ifeq ($(CROSS),rpi)
+  TARGET_ARCH := armv7l
+  TARGET_TOOLCHAIN_PREFIX := arm-linux-gnueabihf-
+endif
+
 
 # Where compiled objects are stored.
 OBJDIR := $(MAKEFILE_DIR)/gen/obj/
@@ -26,13 +36,25 @@ BINDIR := $(MAKEFILE_DIR)/gen/bin/
 LIBDIR := $(MAKEFILE_DIR)/gen/lib/
 GENDIR := $(MAKEFILE_DIR)/gen/obj/
 
+
+ifeq ($(TARGET_ARCH),x86_64)
+	CXXFLAGS += -msse4.2
+endif
+
+ifeq ($(TARGET_ARCH),armv7l)
+	CXXFLAGS += -mfpu=neon
+endif
+
+
 # Settings for the host compiler.
-CXX := $(CC_PREFIX) gcc
-CXXFLAGS := --std=c++11 -O3 -DNDEBUG
-CC := $(CC_PREFIX) gcc
+CXX := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}g++
+CXXFLAGS += --std=c++11 -pthread -O3 -DNDEBUG  -fPIC
+CCFLAGS := ${CXXFLAGS}
+CC := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}gcc
+AR := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}ar
 CFLAGS :=
 LDOPTS :=
-LDOPTS += -L/usr/local/lib
+LDOPTS += -L/usr/local/lib -ldl
 ARFLAGS := -r
 
 INCLUDES := \
@@ -44,6 +66,7 @@ INCLUDES := \
 -I$(MAKEFILE_DIR)/downloads/neon_2_sse \
 -I$(MAKEFILE_DIR)/downloads/farmhash/src \
 -I$(MAKEFILE_DIR)/downloads/flatbuffers/include \
+-I$(MAKEFILE_DIR)/downloads/zlib \
 -I$(GENDIR)
 # This is at the end so any globally-installed frameworks like protobuf don't
 # override local versions in the source tree.
@@ -53,7 +76,7 @@ LIBS := \
 -lstdc++ \
 -lpthread \
 -lm \
--lz
+-ldl
 
 # If we're on Linux, also link in the dl library.
 ifeq ($(OS),LINUX)
@@ -74,6 +97,12 @@ BENCHMARK_SRCS := \
 tensorflow/contrib/lite/tools/benchmark_model.cc
 BENCHMARK_OBJS := $(addprefix $(OBJDIR), \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(BENCHMARK_SRCS))))
+
+
+PYTHON_CAMERA_PATH := $(BINDIR)tflite_c.so
+PYTHON_CAMERA_SRCS := tensorflow/contrib/lite/examples/python_camera/tflite_c.cc
+PYTHON_CAMERA_OBJS := $(addprefix $(OBJDIR), \
+$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(PYTHON_CAMERA_SRCS))))
 
 # What sources we want to compile, must be kept in sync with the main Bazel
 # build files.
@@ -117,7 +146,7 @@ $(OBJDIR)%.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
 # The target that's compiled if there's no command-line arguments.
-all: $(LIB_PATH) $(BENCHMARK_PATH)
+all: $(LIB_PATH) $(BENCHMARK_PATH) $(PYTHON_CAMERA_PATH)
 
 # Gathers together all the objects we've compiled into a single '.a' archive.
 $(LIB_PATH): $(LIB_OBJS)
@@ -129,6 +158,14 @@ $(BENCHMARK_PATH): $(BENCHMARK_OBJS) $(LIB_PATH)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) \
 	-o $(BENCHMARK_PATH) $(BENCHMARK_OBJS) \
 	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
+
+$(PYTHON_CAMERA_PATH): $(PYTHON_CAMERA_OBJS) $(LIB_PATH)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) \
+	-shared -o $(PYTHON_CAMERA_PATH) $(PYTHON_CAMERA_OBJS) \
+	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
+
+
 
 # Gets rid of all generated files.
 clean:
