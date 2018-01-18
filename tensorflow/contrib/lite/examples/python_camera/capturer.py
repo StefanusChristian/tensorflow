@@ -102,3 +102,4 @@ class Capturer:
 
         raise RuntimeError("No camera found!")
 
+

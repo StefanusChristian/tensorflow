@@ -38,7 +38,7 @@ GENDIR := $(MAKEFILE_DIR)/gen/obj/
 
 
 ifeq ($(TARGET_ARCH),x86_64)
-	CXXFLAGS += -msse4.2
+	CXXFLAGS += -DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK # -msse4.2
 endif
 
 ifeq ($(TARGET_ARCH),armv7l)

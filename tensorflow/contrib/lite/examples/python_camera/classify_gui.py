@@ -10,7 +10,9 @@ import classify_model
 
 
 
-model = classify_model.Model("mobilenet_quant_v1_224.tflite","labels.txt",4)
+#model = classify_model.Model("mobilenet_quant_v1_224.tflite","labels.txt",4)
+# model = classify_model.Model("people.tflite","people_labels.txt",4)
+model = classify_model.Model("andy.tflite","andy_labels.txt",4)
 capturer = Capturer()
 capturer.Start()
 
