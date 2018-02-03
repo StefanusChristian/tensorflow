@@ -11,10 +11,11 @@ import classify_model
 
 
 #model = classify_model.Model("mobilenet_quant_v1_224.tflite","labels.txt",4)
-# model = classify_model.Model("people.tflite","people_labels.txt",4)
-model = classify_model.Model("andy.tflite","andy_labels.txt",4)
-capturer = Capturer()
-capturer.Start()
+#model = classify_model.Model("people.tflite","people_labels.txt",4)
+model = classify_model.Model("andy2.tflite","andy2_labels.txt",4)
+#model = classify_model.Model("andy.tflite","andy_labels.txt",4)
+# capturer = Capturer()
+# capturer.Start()
 
 
 def FormatProbs(probs):
@@ -34,7 +35,7 @@ def FormatProbs(probs):
 
 
 class InferenceView(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, capturer):
         QtGui.QWidget.__init__(self)
         self.setWindowTitle("TensorFlow Lite Inference")
         self.text_label = QtGui.QLabel()
@@ -85,13 +86,14 @@ def handle_ctrlc(*args):
 
 
 
+if __name__ == "__main__":
 
-signal.signal(signal.SIGINT, handle_ctrlc)
-# test.inference_subscribers.append(recvimage)
+    signal.signal(signal.SIGINT, handle_ctrlc)
+    # test.inference_subscribers.append(recvimage)
 
 
-app = QtGui.QApplication(sys.argv)
-view = InferenceView()
-view.show()
-app.setQuitOnLastWindowClosed(True)
-app.exec_()
+    app = QtGui.QApplication(sys.argv)
+    view = InferenceView()
+    view.show()
+    app.setQuitOnLastWindowClosed(True)
+    app.exec_()

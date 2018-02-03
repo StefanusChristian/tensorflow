@@ -52,11 +52,11 @@ cameraicon_xpm = [
 "                                ",
 "                                "]
 
-capturer = Capturer()
-capturer.Start()
-def handle_ctrlc(*args):
-    capturer.Shutdown()
-    sys.exit(0)
+# capturer = Capturer()
+# capturer.Start()
+# def handle_ctrlc(*args):
+#     capturer.Shutdown()
+#     sys.exit(0)
 
 
 
@@ -88,15 +88,18 @@ class TrainModel:
 
 
   def train(self):
+    print("TRAINING")
     fp = os.popen(
-        "python tensorflow/examples/image_retraining/retrain.py"
+        "source ~/tensorflow3/bin/activate; python tensorflow/examples/image_retraining/retrain.py"
         " --image_dir=\"{imagedir}\" --architecture={model}"
         " --how_many_training_steps={steps} 2>&1".format(
             imagedir=self.basedir, steps=1000, model="mobilenet_1.0_224"),
         "r")
+    # toco --input_array="input" --output_array="final_result" --input_shape=1,224,224,3 --output_format=TFLITE --input_format=TENSORFLOW_GRAPHDEF --inference_type=FLOAT --input_type=FLOAT --input_file=/tmp/output_graph.pb --output_file=foo.tflite
     while 1:
       line = fp.readline()
       if not line: break
+      print line[:-1]
       m = re.match("^.+Validation accuracy = (\d+\.\d+).+$", line)
       if m:
         # self. float(m.group(1))
@@ -137,7 +140,7 @@ class LossGraph(QtGui.QWidget):
 
 
 class TrainInterface(QtGui.QWidget):
-  def __init__(self, train_model, parent=None):
+  def __init__(self, train_model, capturer, parent=None):
     QtGui.QWidget.__init__(self, parent)
 
     self.image = None
@@ -201,6 +204,7 @@ class TrainInterface(QtGui.QWidget):
 
 
   def train(self):
+    print("HI")
     self.train_model.train()
 
   def updateImage(self):
