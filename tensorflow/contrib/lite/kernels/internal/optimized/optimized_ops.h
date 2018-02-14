@@ -33,6 +33,8 @@ limitations under the License.
 #include "tensorflow/contrib/lite/kernels/internal/round.h"
 #include "tensorflow/contrib/lite/kernels/internal/types.h"
 
+static_assert(sizeof(int)==4, "Expected 32 bit int");
+
 namespace tflite {
 namespace optimized_ops {
 

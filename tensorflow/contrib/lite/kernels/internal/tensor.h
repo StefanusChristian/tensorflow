@@ -19,6 +19,7 @@ limitations under the License.
 #include "tensorflow/contrib/lite/context.h"
 #include "tensorflow/contrib/lite/kernels/internal/types.h"
 
+static_assert(sizeof(int32_t)==sizeof(int), "Foo");
 namespace tflite {
 
 template <typename T>
@@ -36,7 +37,7 @@ inline uint8_t* GetTensorData(TfLiteTensor* tensor) {
 
 template <>
 inline int32_t* GetTensorData(TfLiteTensor* tensor) {
-  return tensor != nullptr ? tensor->data.i32 : nullptr;
+  return tensor != nullptr ? (int32_t*) tensor->data.i32 : nullptr;
 }
 
 template <>
@@ -52,7 +53,8 @@ inline int RemapDim(int max_dimensions, int d) {
 // TODO(ahentz): the implementations in kernels/internal/ take a Dims<4> object
 // even if the original tensors were not 4D. We should consider rewriting them
 // to take a more generic 'shape' object.
-inline Dims<4> GetTensorDims(const int data[], const int size) {
+template<class T>
+inline Dims<4> GetTensorDims(const T* data, const int size) {
   Dims<4> d;
   for (int i = 0; i < 4; ++i) {
     int src = size - i - 1;

@@ -19,12 +19,13 @@ limitations under the License.
 #include "tensorflow/contrib/lite/context.h"
 #include "tensorflow/contrib/lite/error_reporter.h"
 #include "tensorflow/contrib/lite/interpreter.h"
-#include "tensorflow/contrib/lite/nnapi/NeuralNetworksShim.h"
+//#include "tensorflow/contrib/lite/nnapi/NeuralNetworksShim.h"
 
 class ANeuralNetworsModel;
 
 namespace tflite {
 
+#if 0
 class NNAPIAllocation : public MMAPAllocation {
  public:
   NNAPIAllocation(const char* filename, ErrorReporter* error_reporter);
@@ -60,6 +61,8 @@ class NNAPIDelegate {
   // The NN API compilation handle
   ANeuralNetworksCompilation* nn_compiled_model_ = nullptr;
 };
+
+#endif
 
 }  // namespace tflite
 

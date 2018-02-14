@@ -21,10 +21,12 @@ limitations under the License.
 #include <iostream>
 #include <limits>
 
+#if 0
+
 #include "tensorflow/contrib/lite/builtin_op_data.h"
 #include "tensorflow/contrib/lite/context.h"
 #include "tensorflow/contrib/lite/kernels/gemm_support.h"
-#include "tensorflow/contrib/lite/kernels/internal/optimized/multithreaded_conv.h"
+//#include "tensorflow/contrib/lite/kernels/internal/optimized/multithreaded_conv.h"
 #include "tensorflow/contrib/lite/kernels/internal/optimized/optimized_ops.h"
 #include "tensorflow/contrib/lite/kernels/internal/quantization_util.h"
 #include "tensorflow/contrib/lite/kernels/internal/reference/reference_ops.h"
@@ -423,3 +425,4 @@ TfLiteRegistration* Register_CONV_2D() {
 }  // namespace builtin
 }  // namespace ops
 }  // namespace tflite
+#endif

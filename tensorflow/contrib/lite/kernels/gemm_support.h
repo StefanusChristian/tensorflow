@@ -15,7 +15,7 @@ limitations under the License.
 #ifndef THIRD_PARTY_TENSORFLOW_CONTRIB_LITE_KERNELS_GEMM_SUPPORT_H_
 #define THIRD_PARTY_TENSORFLOW_CONTRIB_LITE_KERNELS_GEMM_SUPPORT_H_
 
-#include "public/gemmlowp.h"
+//#include "public/gemmlowp.h"
 #include "tensorflow/contrib/lite/context.h"
 
 namespace tflite {
@@ -35,7 +35,10 @@ namespace gemm_support {
 //   TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 //     auto* gemm_context = gemm_support::GetFromContext(context);
 //   }
-gemmlowp::GemmContext* GetFromContext(TfLiteContext* context);
+//  //   
+#if 0  // TODO(aselle): DO NOT SUBMIT
+  gemmlowp::GemmContext* GetFromContext(TfLiteContext* context);
+#endif
 
 // Let the framework know that the GemmContext stored in 'context' will be used
 // by an op. If necessary a new GemmContext is created and placed in 'context'.

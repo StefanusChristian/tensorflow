@@ -21,8 +21,12 @@ limitations under the License.
 #include "tensorflow/contrib/lite/context.h"
 #include "tensorflow/contrib/lite/error_reporter.h"
 #include "tensorflow/contrib/lite/kernels/gemm_support.h"
-#include "tensorflow/contrib/lite/nnapi_delegate.h"
+//#include "tensorflow/contrib/lite/nnapi_delegate.h"
 
+namespace tflite{
+class NNAPIDelegate{
+};
+}
 namespace {
 
 // Memory allocation tuning
@@ -383,6 +387,7 @@ TfLiteStatus Interpreter::Invoke() {
   }
 
   TfLiteStatus status = kTfLiteOk;
+#if 0
   if (nnapi_delegate_) {
     if (AllocateTensorsWhoseSizesAreKnown() == kTfLiteError) {
       return kTfLiteError;
@@ -399,6 +404,7 @@ TfLiteStatus Interpreter::Invoke() {
       return kTfLiteError;
     }
   }
+#endif
 
   for (int i = 0; i < nodes_and_registration_.size(); i++) {
     // Ensure we have allocated up to this node. The point of this is to
@@ -546,15 +552,17 @@ TfLiteStatus Interpreter::ResizeTensorImpl(TfLiteTensor* tensor,
 }
 
 void Interpreter::UseNNAPI(bool enable) {
+#if 0
   // TODO(aselle): This is a workaround for finding if NNAPI exists.
   // We also need to make sure getLibraryHandle() is renamed to be NNAPI
   // prefixed.
   if (!NNAPIExists()) enable = false;
   if (!enable) {
-    nnapi_delegate_.reset();
+ //   nnapi_delegate_.reset();
   } else if (!nnapi_delegate_) {
-    nnapi_delegate_.reset(new NNAPIDelegate);
+//    nnapi_delegate_.reset(new NNAPIDelegate);
   }
+#endif
 }
 
 void Interpreter::SetNumThreads(int num_threads) {

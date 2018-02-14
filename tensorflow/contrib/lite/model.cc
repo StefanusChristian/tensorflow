@@ -12,11 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#if 0
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
+//#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -72,14 +73,18 @@ FlatBufferModel::FlatBufferModel(const char* filename, bool mmap_file,
                                  ErrorReporter* error_reporter, bool use_nnapi)
     : error_reporter_(error_reporter ? error_reporter
                                      : DefaultErrorReporter()) {
+#if 0
   if (mmap_file) {
     if (use_nnapi && NNAPIExists())
       allocation_ = new NNAPIAllocation(filename, error_reporter);
     else
       allocation_ = new MMAPAllocation(filename, error_reporter);
   } else {
+#endif
     allocation_ = new FileCopyAllocation(filename, error_reporter);
+#if 0
   }
+#endif
   if (!allocation_->valid() || !CheckModelIdentifier()) return;
 
   model_ = VerifyAndGetModel(allocation_->base(), allocation_->bytes());
@@ -782,3 +787,4 @@ TfLiteStatus InterpreterBuilder::operator()(
 }
 
 }  // namespace tflite
+#endif

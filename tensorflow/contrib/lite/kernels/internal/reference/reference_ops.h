@@ -781,7 +781,7 @@ inline void L2Normalization(const uint8* input_data, const Dims<4>& input_dims,
     int32 rescaled_diff = MultiplyByQuantizedMultiplierSmallerThanOne(
         128 * diff, inv_l2norm_multiplier, inv_l2norm_shift);
     int32 unclamped_output_val = 128 + rescaled_diff;
-    int32 output_val = std::min(255, std::max(0, unclamped_output_val));
+    int32 output_val = std::min((int32_t)255, std::max((int32_t)0, unclamped_output_val));
     output_data[Offset(output_dims, i, 0, 0, 0)] =
         static_cast<uint8>(output_val);
   }
@@ -1863,7 +1863,7 @@ inline void Softmax(const uint8* input_data, const Dims<4>& input_dims,
                 (shifted_scale * exp_in_0).raw(), num_bits_over_unit + 31 - 8);
 
             output_data[Offset(output_dims, c, x, y, b)] = static_cast<uint8>(
-                std::max(std::min(unsat_output, static_cast<int32>(255)), 0));
+                std::max(std::min(unsat_output, static_cast<int32>(int32(155))), int32(0)));
 
           } else {
             output_data[Offset(output_dims, c, x, y, b)] = 0;

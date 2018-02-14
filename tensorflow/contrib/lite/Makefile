@@ -29,6 +29,16 @@ ifeq ($(CROSS),rpi)
   TARGET_TOOLCHAIN_PREFIX := arm-linux-gnueabihf-
 endif
 
+ifeq ($(CROSS),stm32f7)
+  TARGET_ARCH := armf7
+  TARGET_TOOLCHAIN_PREFIX := arm-none-eabi-
+endif
+ifeq ($(CROSS),stm32f1)
+  TARGET_ARCH := armm1
+  TARGET_TOOLCHAIN_PREFIX := arm-none-eabi-
+endif
+
+
 
 # Where compiled objects are stored.
 OBJDIR := $(MAKEFILE_DIR)/gen/obj/
@@ -38,17 +48,36 @@ GENDIR := $(MAKEFILE_DIR)/gen/obj/
 
 
 ifeq ($(TARGET_ARCH),x86_64)
-	CXXFLAGS += -DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK # -msse4.2
+	CXXFLAGS += -fPIC -DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK -pthread # -msse4.2
 endif
 
 ifeq ($(TARGET_ARCH),armv7l)
-	CXXFLAGS += -mfpu=neon
+	CXXFLAGS += -mfpu=neon -pthread -fPIC
 endif
+
+ifeq ($(TARGET_ARCH),armf7)
+	CXXFLAGS += -DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK
+	CXXFLAGS += -fno-rtti -fmessage-length=0 -fno-exceptions -fno-builtin -ffunction-sections -fdata-sections
+	CXXFLAGS += -funsigned-char -MMD
+endif
+ifeq ($(TARGET_ARCH),armm1)
+	CXXFLAGS += -DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK -mcpu=cortex-m1 -mthumb
+	CXXFLAGS += -fno-rtti -fmessage-length=0 -fno-exceptions -fno-builtin -ffunction-sections -fdata-sections
+	CXXFLAGS += -funsigned-char -MMD
+endif
+
+#AS      = 'arm-none-eabi-gcc' '-x' 'assembler-with-cpp' '-c' '-Wall' '-Wextra' '-Wno-unused-parameter' '-Wno-missing-field-initializers' '-fmessage-length=0' '-fno-exceptions' '-fno-builtin' '-ffunction-sections' '-fdata-sections' '-funsigned-char' '-MMD' '-fno-delete-null-pointer-checks' '-fomit-frame-pointer' '-Os' '-mcpu=cortex-m7' '-mthumb' '-mfpu=fpv5-sp-d16' '-mfloat-abi=softfp'
+#CC      = 'arm-none-eabi-gcc' '-std=gnu99' '-c' '-Wall' '-Wextra' '-Wno-unused-parameter' '-Wno-missing-field-initializers' '-fmessage-length=0' '-fno-exceptions' '-fno-builtin' '-ffunction-sections' '-fdata-sections' '-funsigned-char' '-MMD' '-fno-delete-null-pointer-checks' '-fomit-frame-pointer' '-Os' '-mcpu=cortex-m7' '-mthumb' '-mfpu=fpv5-sp-d16' '-mfloat-abi=softfp'
+#CPP     = 'arm-none-eabi-g++' '-std=gnu++11' '-fno-rtti' '-Wvla' '-c' '-Wall' '-Wextra' '-Wno-unused-parameter' '-Wno-missing-field-initializers' '-fmessage-length=0' '-fno-exceptions' '-fno-builtin' '-ffunction-sections' '-fdata-sections' '-funsigned-char' '-MMD' '-fno-delete-null-pointer-checks' '-fomit-frame-pointer' '-Os' '-mcpu=cortex-m7' '-mthumb' '-mfpu=fpv5-sp-d16' '-mfloat-abi=softfp'
+#LD      = 'arm-none-eabi-gcc'
 
 
 # Settings for the host compiler.
 CXX := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}g++
-CXXFLAGS += --std=c++11 -pthread -O3 -DNDEBUG  -fPIC
+CXXFLAGS += --std=c++11 -O3 -DNDEBUG
+CXXFLAGS += '-std=gnu++11' '-fno-rtti' '-Wvla' '-c' '-Wall' '-Wextra' '-Wno-unused-parameter' '-Wno-missing-field-initializers' '-fmessage-length=0' '-fno-exceptions' '-fno-builtin' '-ffunction-sections' '-fdata-sections' '-funsigned-char' '-MMD' '-fno-delete-null-pointer-checks' '-fomit-frame-pointer' '-Os' '-mcpu=cortex-m7' '-mthumb' '-mfpu=fpv5-sp-d16' '-mfloat-abi=softfp'
+
+
 CCFLAGS := ${CXXFLAGS}
 CC := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}gcc
 AR := $(CC_PREFIX) ${TARGET_TOOLCHAIN_PREFIX}ar
@@ -64,9 +93,7 @@ INCLUDES := \
 -I$(MAKEFILE_DIR)/downloads/eigen \
 -I$(MAKEFILE_DIR)/downloads/gemmlowp \
 -I$(MAKEFILE_DIR)/downloads/neon_2_sse \
--I$(MAKEFILE_DIR)/downloads/farmhash/src \
 -I$(MAKEFILE_DIR)/downloads/flatbuffers/include \
--I$(MAKEFILE_DIR)/downloads/zlib \
 -I$(GENDIR)
 # This is at the end so any globally-installed frameworks like protobuf don't
 # override local versions in the source tree.
@@ -94,7 +121,7 @@ LIB_PATH := $(LIBDIR)$(LIB_NAME)
 BENCHMARK_PATH := $(BINDIR)benchmark_model
 
 BENCHMARK_SRCS := \
-tensorflow/contrib/lite/tools/benchmark_model.cc
+tensorflow/contrib/lite/tools/test_cortex.cc
 BENCHMARK_OBJS := $(addprefix $(OBJDIR), \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(BENCHMARK_SRCS))))
 
@@ -107,12 +134,14 @@ $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(PYTHON_CAMERA_SRCS))))
 # What sources we want to compile, must be kept in sync with the main Bazel
 # build files.
 
+# $(wildcard tensorflow/contrib/lite/kernels/*.cc) \
+# $(wildcard tensorflow/contrib/lite/kernels/internal/*.cc) \
+# $(wildcard tensorflow/contrib/lite/kernels/internal/optimized/*.cc) \
+# $(wildcard tensorflow/contrib/lite/kernels/internal/reference/*.cc) \
+
+
 CORE_CC_ALL_SRCS := \
 $(wildcard tensorflow/contrib/lite/*.cc) \
-$(wildcard tensorflow/contrib/lite/kernels/*.cc) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/*.cc) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/optimized/*.cc) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/reference/*.cc) \
 $(wildcard tensorflow/contrib/lite/*.c) \
 $(wildcard tensorflow/contrib/lite/kernels/*.c) \
 $(wildcard tensorflow/contrib/lite/kernels/internal/*.c) \
@@ -159,11 +188,11 @@ $(BENCHMARK_PATH): $(BENCHMARK_OBJS) $(LIB_PATH)
 	-o $(BENCHMARK_PATH) $(BENCHMARK_OBJS) \
 	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
 
-$(PYTHON_CAMERA_PATH): $(PYTHON_CAMERA_OBJS) $(LIB_PATH)
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) \
-	-shared -o $(PYTHON_CAMERA_PATH) $(PYTHON_CAMERA_OBJS) \
-	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
+#$(PYTHON_CAMERA_PATH): $(PYTHON_CAMERA_OBJS) $(LIB_PATH)
+#	@mkdir -p $(dir $@)
+#	$(CXX) $(CXXFLAGS) $(INCLUDES) \
+#	-shared -o $(PYTHON_CAMERA_PATH) $(PYTHON_CAMERA_OBJS) \
+#	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
 
 
 

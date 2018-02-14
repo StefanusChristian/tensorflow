@@ -22,7 +22,7 @@ limitations under the License.
 
 #include "tensorflow/contrib/lite/builtin_op_data.h"
 #include "tensorflow/contrib/lite/context.h"
-#include "tensorflow/contrib/lite/kernels/internal/optimized/optimized_ops.h"
+//#include "tensorflow/contrib/lite/kernels/internal/optimized/optimized_ops.h"
 #include "tensorflow/contrib/lite/kernels/internal/quantization_util.h"
 #include "tensorflow/contrib/lite/kernels/internal/reference/reference_ops.h"
 #include "tensorflow/contrib/lite/kernels/internal/tensor.h"
@@ -216,7 +216,7 @@ TfLiteStatus SigmoidEval(TfLiteContext* context, TfLiteNode* node) {
       break;
     }
     case kTfLiteUInt8: {
-      optimized_ops::Logistic(
+      reference_ops::Logistic(
           GetTensorData<uint8_t>(input), GetTensorDims(input),
           input->params.zero_point, data->input_range_radius,
           data->input_multiplier, data->input_left_shift,
@@ -274,7 +274,7 @@ void Softmax2DQuantized(TfLiteTensor* input, TfLiteTensor* output,
   // 1, 1, Y) shape.
   const int batch_size = input->dims->data[0];
   const int input_size = input->dims->data[1];
-  optimized_ops::Softmax(GetTensorData<uint8_t>(input),
+  reference_ops::Softmax(GetTensorData<uint8_t>(input),
                          GetTensorDims({batch_size, 1, 1, input_size}),
                          data->input_multiplier, data->input_left_shift,
                          data->diff_min, GetTensorData<uint8_t>(output),
@@ -284,14 +284,14 @@ void Softmax2DQuantized(TfLiteTensor* input, TfLiteTensor* output,
 // Takes a 4D tensor and perform softmax along the forth dimension.
 void Softmax4DFloat(TfLiteTensor* input, TfLiteTensor* output,
                     TfLiteSoftmaxParams* params) {
-  optimized_ops::Softmax(GetTensorData<float>(input), GetTensorDims(input),
+  reference_ops::Softmax(GetTensorData<float>(input), GetTensorDims(input),
                          params->beta, GetTensorData<float>(output),
                          GetTensorDims(output));
 }
 
 void Softmax4DQuantized(TfLiteTensor* input, TfLiteTensor* output,
                         TfLiteSoftmaxParams* params, OpData* data) {
-  optimized_ops::Softmax(GetTensorData<uint8_t>(input), GetTensorDims(input),
+  reference_ops::Softmax(GetTensorData<uint8_t>(input), GetTensorDims(input),
                          data->input_multiplier, data->input_left_shift,
                          data->diff_min, GetTensorData<uint8_t>(output),
                          GetTensorDims(output));

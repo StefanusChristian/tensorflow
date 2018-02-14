@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download dependencies and build
-sh tensorflow/contrib/lite/download_dependencies.sh
+#sh tensorflow/contrib/lite/download_dependencies.sh
 make -f tensorflow/contrib/lite/Makefile -j 32 clean
 make -f tensorflow/contrib/lite/Makefile -j 32 CROSS=$1
 

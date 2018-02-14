@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#if 0
 #include "tensorflow/contrib/lite/nnapi_delegate.h"
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -397,3 +398,4 @@ TfLiteStatus NNAPIDelegate::Invoke(Interpreter* interpreter) {
 }
 
 }  // namespace tflite
+#endif
