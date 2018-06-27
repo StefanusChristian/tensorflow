@@ -143,10 +143,10 @@ $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(PYTHON_CAMERA_SRCS))))
 CORE_CC_ALL_SRCS := \
 $(wildcard tensorflow/contrib/lite/*.cc) \
 $(wildcard tensorflow/contrib/lite/*.c) \
-$(wildcard tensorflow/contrib/lite/kernels/*.c) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/*.c) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/optimized/*.c) \
-$(wildcard tensorflow/contrib/lite/kernels/internal/reference/*.c) \
+#$(wildcard tensorflow/contrib/lite/kernels/*.c) \
+#$(wildcard tensorflow/contrib/lite/kernels/internal/*.c) \
+#$(wildcard tensorflow/contrib/lite/kernels/internal/optimized/*.c) \
+#$(wildcard tensorflow/contrib/lite/kernels/internal/reference/*.c) \
 $(wildcard tensorflow/contrib/lite/downloads/farmhash/src/farmhash.cc)
 # Remove any duplicates.
 CORE_CC_ALL_SRCS := $(sort $(CORE_CC_ALL_SRCS))
@@ -175,7 +175,7 @@ $(OBJDIR)%.o: %.c
 	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
 
 # The target that's compiled if there's no command-line arguments.
-all: $(LIB_PATH) $(BENCHMARK_PATH) $(PYTHON_CAMERA_PATH)
+all: $(LIB_PATH) $(BENCHMARK_PATH) #$(PYTHON_CAMERA_PATH)
 
 # Gathers together all the objects we've compiled into a single '.a' archive.
 $(LIB_PATH): $(LIB_OBJS)
